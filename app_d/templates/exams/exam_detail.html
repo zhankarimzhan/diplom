@@ -1,0 +1,26 @@
+<!-- templates/exams/exam_detail.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject.name }} - Тесты</title>
+</head>
+<body>
+    <h1>{{ subject.name }} - Тесты:</h1>
+
+    <ul>
+        {% for qa in question_answers %}
+            <li><a href="{% url 'solve_test' qa.id %}">Тест {{ forloop.counter }}</a></li>
+        {% endfor %}
+    </ul>
+    
+    <form method="post" enctype="multipart/form-data" action="{% url 'upload_test' subject.id %}">
+        {% csrf_token %}
+        <input type="file" name="tests_file" accept=".pdf" required>
+        <input type="file" name="answers_file" accept=".pdf" required>
+        <button type="submit">Загрузить тест</button>
+    </form>
+</body>
+</html>

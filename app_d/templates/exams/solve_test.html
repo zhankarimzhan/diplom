@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Test</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+            <h3>{{ question.question }}</h3>
+            {% for option in question.options %}
+                <input type="radio" name="question_{{ forloop.parentloop.counter }}" value="{{ option }}">
+                <label>{{ option }}</label><br>
+            {% endfor %}
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

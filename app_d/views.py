@@ -15,6 +15,121 @@ import os
 # views.py
 from django.shortcuts import render, redirect
 
+# exams/views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Subject, QuestionAnswer
+from django.http import HttpResponse
+# exams/views.py
+from django.shortcuts import render, redirect
+from .models import Subject
+from django.http import HttpResponse
+from .forms import SubjectForm
+from django.shortcuts import render
+from .models import QuestionAnswer
+import json
+
+# Ваш вид solve_test
+# Ваш вид solve_test
+# Ваш вид solve_test
+def solve_test(request, qa_id):
+    question_answer = QuestionAnswer.objects.get(pk=qa_id)
+    
+    # Загрузка вопросов и ответов из JSON
+    questions = json.loads(question_answer.questions_json)
+       
+    correct_answers = json.loads(question_answer.answers_json)
+
+    if request.method == 'POST':
+        # Обработка отправленных ответов
+        user_answers = [request.POST.get(f"question_{question_id}") for question_id in range(1, len(questions) + 1)]
+        user_answers = [i[0].lower() for i in user_answers]
+        
+        for i in (user_answers):
+            print(ord(i))
+        for i in correct_answers.values():
+            print(ord(i))
+        
+        # Подсчет баллов
+        score = sum([1 for user_answer, correct_answer in zip(user_answers, correct_answers.values()) if user_answer == correct_answer.lower()])
+        
+        return render(request, 'exams/test_result.html', {'score': score, 'total_questions': len(questions)})
+
+    return render(request, 'exams/solve_test.html', {'questions': questions})
+
+def add_subject(request):
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')
+    else:
+        form = SubjectForm()
+
+    return render(request, 'exams/add_subject.html', {'form': form})
+
+def index(request):
+    subjects = Subject.objects.all()
+    return render(request, 'exams/index.html', {'subjects': subjects})
+
+def exam_detail(request, subject_id):
+    subject = get_object_or_404(Subject, pk=subject_id)
+    question_answers = QuestionAnswer.objects.filter(subject=subject)
+    return render(request, 'exams/exam_detail.html', {'subject': subject, 'question_answers': question_answers})
+
+
+def upload_test(request, subject_id):
+    # Добавьте здесь код для обработки загрузки теста
+    if request.method == 'POST' and request.FILES['test_file']:
+        test_file = request.FILES['test_file']
+        # Обработка файла
+        return HttpResponse("Test uploaded successfully")
+    return HttpResponse("Failed to upload test")
+import os
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Subject, QuestionAnswer
+
+def upload_test(request, subject_id):
+    if request.method == 'POST' and request.FILES['tests_file'] and request.FILES['answers_file']:
+        pdf_file_questions = request.FILES['tests_file']
+        pdf_file_answers = request.FILES['answers_file']
+ 
+        # Укажите директорию 'pdfs' в методе save
+        fs = FileSystemStorage(location='pdfs')
+
+        # Сохранение файлов
+        filename_questions = fs.save(pdf_file_questions.name, pdf_file_questions)
+        filename_answers = fs.save(pdf_file_answers.name, pdf_file_answers)
+
+        # Получение полного пути к сохраненным файлам
+        saved_file_path_questions = os.path.join(fs.location, filename_questions)
+        saved_file_path_answers = os.path.join(fs.location, filename_answers)
+
+        # Ваш код для дополнительной обработки файлов, если необходимо
+        data_questions = analyze_pdf(saved_file_path_questions)
+        data_answers = extract_answers_from_pdf(saved_file_path_answers)
+
+        # Сохранение данных в JSON-файлы
+        output_json_file_questions = filename_questions + '.json'
+        output_json_file_answers = 'pdfs/'+filename_answers + '_answers.json'
+
+        save_to_json(data_questions, output_json_file_questions)
+        save_answers_to_json(data_answers, output_json_file_answers)
+        
+        # Сохранение данных в базу данных
+        subject = Subject.objects.get(pk=subject_id)
+
+        # Создание объекта QuestionAnswer с использованием модели
+        question_answer = QuestionAnswer.objects.create(
+            subject=subject,
+            questions_json=json.dumps(data_questions),
+            answers_json=json.dumps(data_answers)
+        )
+        return HttpResponse(f'PDF files uploaded successfully! Path: {saved_file_path_questions}, {saved_file_path_answers}')
+
+    return render(request, 'index.html')
+
 
 def analyze_pdf(file_path):
     with open(file_path, 'rb') as file:

@@ -1,0 +1,19 @@
+<!-- templates/exams/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Portal</title>
+</head>
+<body>
+    <h1>Разделы:</h1>
+    <ul>
+        {% for subject in subjects %}
+            <li><a href="{% url 'exam_detail' subject.id %}">{{ subject.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'add_subject' %}">Добавить раздел</a>
+</body>
+</html>
