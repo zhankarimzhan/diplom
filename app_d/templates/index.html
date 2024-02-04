@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload PDF</title>
+</head>
+<body>
+    <h1>Upload PDF Files</h1>
+
+    <!-- Одна форма для загрузки обоих файлов -->
+    <form method="post" enctype="multipart/form-data" action="{% url 'upload_pdf' %}">
+        {% csrf_token %}
+
+        <label for="pdf_file_questions">Upload Questions PDF:</label>
+        <input type="file" name="pdf_file_questions" id="pdf_file_questions" accept=".pdf" required>
+
+        <label for="pdf_file_answers">Upload Answers PDF:</label>
+        <input type="file" name="pdf_file_answers" id="pdf_file_answers" accept=".pdf" required>
+
+        <button type="submit">Upload PDFs</button>
+    </form>
+</body>
+</html>

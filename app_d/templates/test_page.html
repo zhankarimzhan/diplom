@@ -1,0 +1,28 @@
+<!-- templates/test_page.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест</title>
+</head>
+<body>
+    <h1>Тест по русскому языку</h1>
+    <form method="post" action="{% url 'submit_answers' %}">
+        {% csrf_token %}
+        {% for question in questions %}
+            <fieldset>
+                <legend>{{ question.question_text }}</legend>
+                {% for option in question.option_set.all %}
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="{{ option.id }}">
+                        {{ option.option_text }}
+                    </label><br>
+                {% endfor %}
+            </fieldset>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
